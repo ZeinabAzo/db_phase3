@@ -16,7 +16,7 @@ db_config = {
     "user": DB_USER,
     "password": DB_PASSWORD,
     "pool_name": "sport_ticket_pool",
-    "pool_size": 20
+    "pool_size": 5
 }
 
 connection_pool = pooling.MySQLConnectionPool(
@@ -26,4 +26,3 @@ connection_pool = pooling.MySQLConnectionPool(
 
 def get_connection():
     return connection_pool.get_connection()
-
