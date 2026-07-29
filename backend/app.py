@@ -1,10 +1,27 @@
 from fastapi import FastAPI
+from routes.location import router as location_router
 from routes import auth_router
 
-app = FastAPI()
+#  create api instance 
+app = FastAPI(
+    title="Sport Ticket Reservation System",
+    description="Backend API for sport ticket reservation project",
+    version="1.0.0"
+)
 
+app.include_router(location_router)
 app.include_router(auth_router.router)
 
+
+# first test
 @app.get("/")
 def root():
-    return {"message": "API Server is running!"}
+    return {
+        "message": "Sport Ticket Reservation API is running"
+    }
+
+
+
+
+
+
