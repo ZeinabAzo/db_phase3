@@ -30,7 +30,11 @@ def generate_and_save_otp(identifier: str):
     
     return True
 
-def verify_otp_code(identifier: str, otp_code: str):
+def verify_otp_code(
+    identifier: str,
+    identifier_type: str,
+    otp_code: str
+):
     stored_otp = redis_db.get(f"otp:{identifier}")
 
     if stored_otp is None:
@@ -48,7 +52,29 @@ def verify_otp_code(identifier: str, otp_code: str):
     # OTP is correct
     redis_db.delete(f"otp:{identifier}")
 
-    # Mark this identifier as verified for registration
+    # Check whether the user already exists
+    existing_user = get_user_by_identifier(
+        identifier=identifier,
+        identifier_type=identifier_type
+    )
+
+    # Existing user -> Login
+    if existing_user is not None:
+
+        access_token = create_access_token(
+            user_id=existing_user["user_id"]
+        )
+
+        return {
+            "success": True,
+            "registered": True,
+            "user_id": existing_user["user_id"],
+            "access_token": access_token,
+            "token_type": "bearer",
+            "message": "Login successful."
+        }
+
+    # New user -> Allow registration
     redis_db.set(
         f"otp_verified:{identifier}",
         "true",
@@ -57,7 +83,8 @@ def verify_otp_code(identifier: str, otp_code: str):
 
     return {
         "success": True,
-        "message": "OTP verified successfully."
+        "registered": False,
+        "message": "OTP verified successfully. Please complete registration."
     }
 
 
@@ -136,7 +163,9 @@ def register_user(
 
     return {
         "success": True,
+        "registered": True,
         "user_id": user_id,
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "message": "Registration completed successfully."
     }
