@@ -5,6 +5,9 @@ from repositories.user_repository import (
     get_user_by_identifier,
     create_user
 )
+from repositories.city_repository import get_city_id_by_name
+from repositories.role_repository import get_role_id_by_name
+
 from utils.security import (
     hash_password,
     create_access_token
@@ -64,7 +67,9 @@ def register_user(
     identifier_type: str,
     first_name: str,
     last_name: str,
-    password: str
+    password: str,
+    city: str,
+    role: str
 ):
     # 1. Check OTP verification
     otp_verified = redis_db.get(
@@ -92,13 +97,31 @@ def register_user(
     # 3. Hash password
     password_hash = hash_password(password)
 
+    city_id = get_city_id_by_name(city)
+    # Default role is "user". Replace with a dynamic role when additional roles are supported.
+    role_id = get_role_id_by_name("guest")
+
+    if city_id is None:
+        return {
+            "success": False,
+            "message": "City not found."
+        }
+
+    if role_id is None:
+        return {
+            "success": False,
+            "message": "Role not found."
+        }
+
     # 4. Create user
     user_id = create_user(
         first_name=first_name,
         last_name=last_name,
         password_hash=password_hash,
         identifier=identifier,
-        identifier_type=identifier_type
+        identifier_type=identifier_type,
+        city_id=city_id,
+        role_id=role_id
     )
 
     # 5. Remove OTP verification

@@ -91,7 +91,9 @@ def create_user(
     last_name: str,
     password_hash: str,
     identifier: str,
-    identifier_type: str
+    identifier_type: str,
+    city_id : int,
+    role_id : int ,
 ):
     connection = get_connection()
     cursor = connection.cursor()
@@ -103,9 +105,11 @@ def create_user(
                     first_name,
                     last_name,
                     phone,
-                    password_hash
+                    password_hash,
+                    city_id,
+                    role_id
                 )
-                VALUES (%s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
         else:
             query = """
@@ -113,9 +117,11 @@ def create_user(
                     first_name,
                     last_name,
                     email,
-                    password_hash
+                    password_hash,
+                    city_id,
+                    role_id
                 )
-                VALUES (%s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
 
         cursor.execute(
@@ -124,7 +130,9 @@ def create_user(
                 first_name,
                 last_name,
                 identifier,
-                password_hash
+                password_hash,
+                city_id,
+                role_id
             )
         )
 
@@ -148,7 +156,8 @@ def update_user(
     last_name: str | None = None,
     email: str | None = None,
     phone: str | None = None,
-    profile_image: str | None = None
+    profile_image: str | None = None,
+    city_id : int | None = None
 ):
     connection = get_connection()
     cursor = connection.cursor()
@@ -186,6 +195,10 @@ def update_user(
         if profile_image is not None:
             updates.append("profile_image = %s")
             params.append(profile_image)
+
+        if city_id is not None:
+            updates.append("city_id = %s")
+            params.append(city_id)
 
         # No fields were provided for update
         if not updates:

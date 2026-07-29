@@ -47,7 +47,8 @@ def update_my_profile(
         last_name=request.last_name,
         email=request.email,
         phone=request.phone,
-        profile_image=request.profile_image
+        profile_image=request.profile_image,
+        city=request.city
     )
 
     # Return an error if the update was not successful

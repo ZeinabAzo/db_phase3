@@ -4,6 +4,8 @@ import json
 from repositories.user_repository import get_user_by_id
 from repositories.user_repository import update_user
 from cache.redis_client import get_redis
+from repositories.city_repository import get_city_id_by_name
+
 
 def get_user_profile(user_id: int):
 
@@ -51,8 +53,17 @@ def update_user_profile(
     last_name: str | None = None,
     email: str | None = None,
     phone: str | None = None,
-    profile_image: str | None = None
+    profile_image: str | None = None,
+    city: str | None = None
 ):
+    
+    city_id = get_city_id_by_name(city)
+    if city_id is None:
+        return {
+            "success": False,
+            "message": "City not found."
+        }
+
     # Update user information in MySQL
     updated = update_user(
         user_id=user_id,
@@ -60,8 +71,10 @@ def update_user_profile(
         last_name=last_name,
         email=email,
         phone=phone,
-        profile_image=profile_image
+        profile_image=profile_image,
+        city_id=city_id,
     )
+
 
     if not updated:
         return {
