@@ -1,8 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from services.auth_service import generate_and_save_otp
-from services.auth_service import verify_otp_code
+from services.auth_service import (
+    generate_and_save_otp,
+    verify_otp_code,
+    register_user
+)
+
+from models.Register import RegisterRequest
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -57,3 +62,28 @@ def verify_otp(request: VerifyOTPRequest):
         "status": "success",
         "message": result["message"]
     }
+
+@router.post("/register")
+def register(request: RegisterRequest):
+
+    # Pass the registration data to the service layer
+    # The service handles OTP verification, password hashing,
+    # user creation, and JWT token generation
+    result = register_user(
+        identifier=request.identifier,
+        identifier_type=request.identifier_type,
+        first_name=request.first_name,
+        last_name=request.last_name,
+        password=request.password
+    )
+
+    # Return an HTTP 400 error if the registration process fails
+    if not result["success"]:
+        raise HTTPException(
+            status_code=400,
+            detail=result["message"]
+        )
+
+    # Return the registration result, including the JWT access token
+    return result
+
