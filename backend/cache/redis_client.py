@@ -1,10 +1,17 @@
+import os
 import redis
-from config import REDIS_HOST, REDIS_PORT
+from dotenv import load_dotenv
 
-# تنظیم decode_responses=True باعث می‌شود دیتا به جای بایت، به صورت استرینگ خوانده شود
+load_dotenv()
+
+# read ports and redis host
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+
+#makes outputs pythonic strings :D
 redis_db = redis.Redis(
-    host=REDIS_HOST, 
-    port=int(REDIS_PORT), 
+    host=REDIS_HOST,
+    port=int(REDIS_PORT or 6379),
     decode_responses=True
 )
 
