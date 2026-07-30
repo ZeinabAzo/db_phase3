@@ -139,7 +139,3 @@ def signup_verify(request: VerifySignUpRequest):
         )
 
     return result
-            detail=result["message"]
-        )
-        
-    return result
