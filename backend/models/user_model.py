@@ -8,3 +8,10 @@ class UpdateProfileRequest(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     profile_image: Optional[str] = None
+    city: Optional[str] = None # add city to fix one tiny bug 
+
+# add one class to register
+class LoginRequest(BaseModel):
+    identifier: str
+    identifier_type: str  # "phone" or "email"
+    password: str

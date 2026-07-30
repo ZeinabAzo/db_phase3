@@ -14,9 +14,6 @@ class OTPRequest(BaseModel):
     identifier_type: str
 
 
-class SignInRequest(BaseModel):
-    identifier: str
-    password: str
 
 
 class SignUpRequest(BaseModel):

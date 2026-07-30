@@ -4,20 +4,22 @@ from typing import Optional
 from services.auth_service import (
     signup_user,
     verify_signup,
+    generate_and_save_otp,
+    verify_otp_code,
+    register_user,
+    login_user
 )
 from models.Register import RegisterRequest
 from models.auth_model import (
     OTPRequest , 
     VerifyOTPRequest,
-    SignInRequest,
     SignUpRequest,
     VerifySignUpRequest
 )
-
-
+from models.user_model import LoginRequest
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
+#---------------------------------------------------------------------------------------------------------------
 # @router.post("/send-otp")
 # def send_otp(request: OTPRequest):
 
@@ -77,6 +79,28 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 #     # Return the registration result, including the JWT access token
 
 #     return result
+#--------------------------------------------------------------------------------
+
+
+
+
+
+@router.post("/login")
+def login(request: LoginRequest):
+    result = login_user(
+        identifier=request.identifier,
+        identifier_type=request.identifier_type,
+        password=request.password
+    )
+    
+    if not result["success"]:
+        raise HTTPException(
+            status_code=400,
+            detail=result["message"]
+        )
+        
+    return result
+
 
 @router.post("/signup")
 def signup(request: SignUpRequest):
@@ -115,8 +139,3 @@ def signup_verify(request: VerifySignUpRequest):
         )
 
     return result
-
-
-@router.post("/signin")
-def signin(request: SignInRequest):
-    pass

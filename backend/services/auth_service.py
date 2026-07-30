@@ -8,6 +8,7 @@ from repositories.user_repository import (
 )
 from repositories.city_repository import get_city_id_by_name
 from repositories.role_repository import get_role_id_by_name
+from utils.security import verify_password, create_access_token 
 
 from utils.security import (
     hash_password,
@@ -173,6 +174,35 @@ def register_user(
 
 
 
+
+def login_user(identifier: str, identifier_type: str, password: str):
+    # search user using identifier
+    user = get_user_by_identifier(identifier, identifier_type)
+    
+    #user not found
+    if not user:
+        return {
+            "success": False,
+            "message": "No user with this email/phone number."
+        }
+    
+    # is password correct?
+    if not verify_password(password, user["password_hash"]):
+        return {
+            "success": False,
+            "message": "wrong password"
+        }
+    
+    # create JWT token to access user
+    access_token = create_access_token(user["user_id"])
+    
+    return {
+        "success": True,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Logged in successfully."
+    }
+
 def signup_user(
     identifier: str,
     identifier_type: str,
@@ -273,7 +303,7 @@ def verify_signup(
     )
 
     forbidden_roles = ["admin","super_admin"]
-
+    
     if signup_data["role"] in forbidden_roles:
         return {
             "success": False,
