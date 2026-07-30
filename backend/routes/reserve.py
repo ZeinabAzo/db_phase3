@@ -10,14 +10,10 @@ def reserve(user_id: int, ticket_id : int,):
     return reserve_ticket(user_id, ticket_id)
 
 @router.get("/active_reservations")
-def active(
-    user_id: int,
-):
+def active(user_id: int,):
     return active_reservations(user_id)
 
 
 @router.get("/reservation_history")
-def history(
-    user_id: int,
-):
+def history(user_id: int,):
     return reservation_history(user_id)
