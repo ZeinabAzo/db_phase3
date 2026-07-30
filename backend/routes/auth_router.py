@@ -139,19 +139,6 @@ def signup_verify(request: VerifySignUpRequest):
         )
 
     return result
-
-
-@router.post("/login")
-def login(request: LoginRequest):
-    result = login_user(
-        identifier=request.identifier,
-        identifier_type=request.identifier_type,
-        password=request.password
-    )
-    
-    if not result["success"]:
-        raise HTTPException(
-            status_code=400,
             detail=result["message"]
         )
         
