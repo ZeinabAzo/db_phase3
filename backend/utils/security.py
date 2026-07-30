@@ -65,3 +65,14 @@ def decode_access_token(token: str):
 
     except jwt.InvalidTokenError:
         return None
+
+# hash password
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# get simple password and hash it
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+# verify password(check the hashed password with the simple one from database)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
