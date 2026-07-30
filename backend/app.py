@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from routes.location import router as location_router
 from routes.ticket import router as ticket_router
 from routes import auth_router
-from routes.reserve import router as reserve_rout
+from routes.reserve import router as reserve_router
 
 
 #  create api instance 
