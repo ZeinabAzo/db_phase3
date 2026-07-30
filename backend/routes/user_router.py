@@ -35,7 +35,7 @@ def get_my_profile(
     # Return the user's profile information
     return result["user"]
 
-@router.put("/me")
+@router.patch("/me")
 def update_my_profile(
     request: UpdateProfileRequest,
     user_id: int = Depends(get_current_user)
