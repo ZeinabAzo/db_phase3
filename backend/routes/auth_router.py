@@ -4,10 +4,12 @@ from typing import Optional
 from services.auth_service import (
     generate_and_save_otp,
     verify_otp_code,
-    register_user
+    register_user,
+    login_user
 )
 
 from models.Register import RegisterRequest
+from models.user_model import LoginRequest
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -81,4 +83,21 @@ def register(request: RegisterRequest):
         )
     # Return the registration result, including the JWT access token
 
+    return result
+
+
+@router.post("/login")
+def login(request: LoginRequest):
+    result = login_user(
+        identifier=request.identifier,
+        identifier_type=request.identifier_type,
+        password=request.password
+    )
+    
+    if not result["success"]:
+        raise HTTPException(
+            status_code=400,
+            detail=result["message"]
+        )
+        
     return result
