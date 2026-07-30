@@ -54,6 +54,15 @@ def reserve_ticket(user_id, ticket_id):
 
         return{"success" : True, "message" :"Ticket reserved successfully" }
 
+    except Exception as e:
+        if "data_connection" in locals():
+            data_connection.rollback()
+        
+
+        return{
+            "success": False, "message" : "Failed to reserve ticket"
+        }
+
     finally:
         if cursor:
             cursor.close()
