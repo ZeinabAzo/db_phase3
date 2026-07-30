@@ -1,4 +1,7 @@
 from db.database import get_connection
+import json
+from cache.redis_client import get_redis
+
 
 def search_ticket(
     city=None,
@@ -12,9 +15,22 @@ def search_ticket(
     max_price=None,
 ):
 
-    data_connection = get_connection()
+    cursor = None
 
     try:
+        data_connection = get_connection()
+        redis = get_redis()
+
+        cache_key = (
+            f"search_ticket:"
+            f"{city}:{sport_type}:{venue}:{home_team}:{away_team}:{date}:{ticket_type}:{min_price}:{max_price}"
+        )
+
+        cached_data = redis.get(cache_key)
+
+        if cached_data:
+            return json.loads(cached_data)
+
         cursor = data_connection.cursor(dictionary=True)
 
         query = """
@@ -115,8 +131,17 @@ def search_ticket(
 
         tickets = cursor.fetchall()
 
+
+
+        redis.setex(
+            cache_key,300,json.dumps(tickets, default=str)
+        )
+
         return tickets
 
     finally:
-        cursor.close()
-        data_connection.close()
+        if cursor:
+            cursor.close()
+
+        if 'data_connection' in locals():
+            data_connection.close()
