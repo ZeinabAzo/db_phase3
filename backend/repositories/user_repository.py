@@ -62,21 +62,27 @@ def get_user_by_id(user_id: int):
     try:
         query = """
             SELECT
-                user_id,
-                first_name,
-                last_name,
-                email,
-                phone,
-                profile_image,
-                status,
-                created_at,
-                updated_at,
-                role_id,
-                city_id
-            FROM users
-            WHERE user_id = %s
-            LIMIT 1
+                u.user_id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.phone,
+                u.profile_image,
+                u.status,
+                u.created_at,
+                u.updated_at,
+                c.name AS city,
+                r.role_name AS role
+            FROM users u
+            JOIN city c
+                ON u.city_id = c.city_id
+            JOIN role r
+                ON u.role_id = r.role_id
+            WHERE u.user_id = %s
+            LIMIT 1;
         """
+
+
 
         cursor.execute(query, (user_id,))
 
