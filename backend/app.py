@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from routes.location import router as location_router
 from routes.ticket import router as ticket_router
 from routes import auth_router
+from routes.user_router import router as user_router
 
 
 #  create api instance 
@@ -13,6 +14,7 @@ app = FastAPI(
 
 app.include_router(location_router)
 app.include_router(auth_router.router)
+app.include_router(user_router)
 app.include_router(ticket_router)
 
 
