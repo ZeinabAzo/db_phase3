@@ -33,6 +33,27 @@ def reserve_ticket(user_id, ticket_id):
                 "message": "Ticket is not available"
             }
 
+        created_at = datetime.now()
+        expired_at = created_at + timedelta(minutes = 10)
+
+        cursor.execute(
+            """
+            insert into reserve(user_id, ticket_id, total_price, status, created_at, expire_at)
+            values(%s,%s,%s,%s,%s,%s) """
+            ,(user_id, ticket_id, ticket["price"],"pending", created_at, expired_at),
+        )
+
+        cursor.execute(
+            """
+            update ticket
+            set status = 'reserved'
+            where ticket_id = %s """, (ticket_id,)
+        )
+
+        data_connection.commit()
+
+        return{"success" : True, "message" :"Ticket reserved successfully" }
+
     finally:
         if cursor:
             cursor.close()
