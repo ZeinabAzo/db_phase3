@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends
+from models.admin_model import CancelReserveRequest
+
 
 from services.admin_service import (
     get_cancelled_reserves_service,
     get_all_payments_service,
     get_ticket_reports_service,
-    get_reserve_reports_service
+    get_reserve_reports_service,
+    cancel_reserve_by_admin_service,
+    get_reserve_by_id_service
 )
 
 from utils.dependencies import (
@@ -40,3 +44,21 @@ def reserve_reports(
     admin=Depends(get_current_admin)
 ):
     return get_reserve_reports_service()
+
+@router.get("/reserves/{reserve_id}")
+def get_reserve_by_id_endpoint(
+    reserve_id: int,
+    admin=Depends(get_current_admin)
+):
+    return get_reserve_by_id_service(reserve_id)
+
+@router.patch("/reserves/{reserve_id}/cancel")
+def cancel_reserve_endpoint(
+    reserve_id: int,
+    data: CancelReserveRequest,
+    admin=Depends(get_current_admin)
+):
+    return cancel_reserve_by_admin_service(
+        reserve_id,
+        data.reason
+    )

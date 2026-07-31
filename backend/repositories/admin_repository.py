@@ -1,4 +1,5 @@
 from db.database import get_connection
+from datetime import datetime
 
 def get_cancelled_reserves():
 
@@ -185,3 +186,195 @@ def get_reserve_reports():
     connection.close()
 
     return reports
+
+def get_reserve_by_id(
+    reserve_id: int
+):
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = """
+        SELECT
+            r.reserve_id,
+            r.status,
+            r.created_at,
+            r.expire_at,
+
+            u.user_id,
+            u.first_name,
+            u.last_name,
+            u.email,
+
+            t.ticket_id,
+            t.status AS ticket_status
+
+        FROM reserve r
+
+        JOIN users u
+            ON r.user_id = u.user_id
+
+        JOIN ticket t
+            ON r.ticket_id = t.ticket_id
+
+        WHERE r.reserve_id = %s
+    """
+
+    cursor.execute(query, (reserve_id,))
+
+    reserve = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return reserve
+
+def cancel_reserve(
+    reserve_id: int
+):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    query = """
+        UPDATE reserve
+        SET status = 'cancelled'
+        WHERE reserve_id = %s
+    """
+
+    cursor.execute(query, (reserve_id,))
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+def make_ticket_available(
+    ticket_id: int
+):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    query = """
+        UPDATE ticket
+        SET status = 'available'
+        WHERE ticket_id = %s
+    """
+
+    cursor.execute(query, (ticket_id,))
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+def get_payment_by_reserve_id(
+    reserve_id: int
+):
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = """
+        SELECT *
+        FROM payment
+        WHERE reservation_id = %s
+    """
+
+    cursor.execute(query, (reserve_id,))
+
+    payment = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return payment
+
+def create_refund(
+    payment_id: int,
+    amount: float,
+    reason: str
+):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    query = """
+        INSERT INTO refund (
+            amount,
+            reason,
+            payment_id
+        )
+        VALUES (%s, %s, %s)
+    """
+
+    cursor.execute(
+        query,
+        (
+            amount,
+            reason,
+            payment_id
+        )
+    )
+
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+def expire_old_reserves():
+
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+
+        query = """
+            SELECT ticket_id
+            FROM reserve
+            WHERE expire_at < NOW()
+            AND status = 'pending'
+        """
+
+        cursor.execute(query)
+
+        reserves = cursor.fetchall()
+
+        ticket_ids = [
+            reserve["ticket_id"]
+            for reserve in reserves
+        ]
+
+        update_reserve_query = """
+            UPDATE reserve
+            SET status = 'expired'
+            WHERE expire_at < NOW()
+            AND status = 'pending'
+        """
+
+        cursor.execute(update_reserve_query)
+
+        if ticket_ids:
+
+            placeholders = ",".join(
+                ["%s"] * len(ticket_ids)
+            )
+
+            update_ticket_query = f"""
+                UPDATE ticket
+                SET status = 'available'
+                WHERE ticket_id IN ({placeholders})
+            """
+
+            cursor.execute(
+                update_ticket_query,
+                tuple(ticket_ids)
+            )
+
+        connection.commit()
+
+        return len(ticket_ids)
+
+    except Exception:
+
+        connection.rollback()
+        raise
+
+    finally:
+
+        cursor.close()
+        connection.close()
