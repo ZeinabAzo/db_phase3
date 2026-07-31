@@ -6,6 +6,7 @@ from routes.user_router import router as user_router
 from routes.admin_router import router as admin_router
 
 
+
 #  create api instance 
 app = FastAPI(
     title="Sport Ticket Reservation System",
