@@ -235,3 +235,25 @@ def update_user(
     finally:
         cursor.close()
         connection.close()
+
+def get_role_by_user_id(user_id: int):
+
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = """
+        SELECT r.role_name
+        FROM users u
+        JOIN role r
+            ON u.role_id = r.role_id
+        WHERE u.user_id = %s
+    """
+
+    cursor.execute(query, (user_id,))
+
+    role = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return role
