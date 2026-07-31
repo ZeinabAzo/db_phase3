@@ -1,19 +1,26 @@
-from fastapi import APIRouter   
+from fastapi import APIRouter  , Depends 
 from services.reserve_service import reserve_ticket , active_reservations, reservation_history
-
+from utils.security import get_current_user
 
 router = APIRouter()
 
 @router.post("/reserve_ticket")
-def reserve(user_id: int, ticket_id : int):
+def reserve(
+    ticket_id: int,
+    current_user: int = Depends(get_current_user),
+):
+    return reserve_ticket(current_user, ticket_id)
 
-    return reserve_ticket(user_id, ticket_id)
 
 @router.get("/active_reservations")
-def active(user_id: int):
-    return active_reservations(user_id)
+def active(
+    current_user: int = Depends(get_current_user),
+):
+    return active_reservations(current_user)
 
 
 @router.get("/reservation_history")
-def history(user_id: int):
-    return reservation_history(user_id)
+def history(
+    current_user: int = Depends(get_current_user),
+):
+    return reservation_history(current_user)
