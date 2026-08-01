@@ -25,3 +25,48 @@ def get_reservation_for_cancellation(reserve_id: int, user_id: int):
     finally:
         cursor.close()
         connection.close()
+
+
+def cancel_reservation_and_free_ticket(reserve_id: int, user_id: int):
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # Find the reserve and ticket information for the given reserve_id and user_id
+        cursor.execute("""
+            SELECT ticket_id FROM reserve 
+            WHERE reserve_id = %s AND user_id = %s AND status = 'confirmed'
+        """, (reserve_id, user_id))
+        
+        reserve_data = cursor.fetchone()
+        if not reserve_data:
+            return False
+
+        ticket_id = reserve_data["ticket_id"]
+
+        # change the status of the reserve to 'cancelled'
+        cursor.execute("""
+            UPDATE reserve 
+            SET status = 'cancelled' 
+            WHERE reserve_id = %s
+        """, (reserve_id,))
+
+        # reset the status of the ticket to 'available'
+        cursor.execute("""
+            UPDATE ticket 
+            SET status = 'available' 
+            WHERE ticket_id = %s
+        """, (ticket_id,))
+
+        # transaction commit to save the changes in the database
+        connection.commit()
+        return True
+
+    except Exception as e:
+        # rollback the transaction in case of any error to maintain data integrity
+        connection.rollback()
+        raise e
+
+    finally:
+        cursor.close()
+        connection.close()

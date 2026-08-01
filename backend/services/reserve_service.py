@@ -1,6 +1,6 @@
 from db.database import get_connection
 from datetime import datetime, timedelta
-from repositories.reserve_repository import get_reservation_for_cancellation
+from repositories.reserve_repository import get_reservation_for_cancellation, cancel_reservation_and_free_ticket
 
 
 def reserve_ticket(user_id, ticket_id):
@@ -291,5 +291,35 @@ def calculate_cancellation_penalty(reserve_id: int, user_id: int):
             "refund_amount": refund_amount,
             "rules": f"because the match is {hours_until_match:.2f} hours away, a {penalty_percentage}% penalty applies, which amounts to {penalty_amount} units. The refund amount will be {refund_amount} units."
         },
+        "status_code": 200
+    }
+
+
+def cancel_ticket_and_refund(reserve_id: int, user_id: int):
+    # chevk if it has the conditions to be cancelled
+    penalty_check = calculate_cancellation_penalty(reserve_id, user_id)
+    
+    if not penalty_check["success"]:
+        return penalty_check  # if not, return the error
+
+    # otherwise just update db
+    db_update_success = cancel_reservation_and_free_ticket(reserve_id, user_id)
+    
+    if not db_update_success:
+        return {
+            "success": False, 
+            "message": "Error occurred while updating the database. Please try again later.", 
+            "status_code": 500
+        }
+
+    # get the refund amount from the penalty check result
+    refund_amount = penalty_check["data"]["refund_amount"]
+    
+    # if in the future we add some wallet, the adding to it part will be written here.
+
+    return {
+        "success": True,
+        "message": f"Reservation cancelled successfully. Refund amount: {refund_amount} units.",
+        "refund_amount": refund_amount,
         "status_code": 200
     }
