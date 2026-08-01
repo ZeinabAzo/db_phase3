@@ -2,8 +2,12 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta,timezone
 from passlib.context import CryptContext
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 import bcrypt
+
+security = HTTPBearer()
 
 
 load_dotenv()
@@ -76,3 +80,21 @@ def get_password_hash(password: str) -> str:
 # verify password(check the hashed password with the simple one from database)
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+
+
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    token = credentials.credentials
+
+    payload = decode_access_token(token)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token"
+        )
+
+    return int(payload["sub"])

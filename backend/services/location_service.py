@@ -35,4 +35,3 @@ def get_locations():
         cursor.close()
         data_connection.close()
         
-
