@@ -1,5 +1,6 @@
 from db.database import get_connection
 from datetime import datetime, timedelta
+from repositories.reserve_repository import get_reservation_for_cancellation
 
 
 def reserve_ticket(user_id, ticket_id):
@@ -242,3 +243,53 @@ def reservation_history(user_id):
 
         if "data_connection" in locals():
             data_connection.close()
+
+
+
+def calculate_cancellation_penalty(reserve_id: int, user_id: int):
+    # get reserve info from database
+    reservation = get_reservation_for_cancellation(reserve_id, user_id)
+    
+    if not reservation:
+        return {"success": False, "message": "A reservation with this id was not found, or is not yours.", "status_code": 404}
+        
+    if reservation["reserve_status"] != "confirmed":
+        return {"success": False, "message": "Only confirmed reservations can be cancelled.", "status_code": 400}
+
+    # calculate the time left to the match
+    start_time = reservation["start_time"]
+    now = datetime.now()
+    
+    if start_time <= now:
+        return {"success": False, "message": "The match has already started(or passed), and cancellation is not possible.", "status_code": 400}
+
+    # calculate the time difference in hours
+    time_difference = start_time - now
+    hours_until_match = time_difference.total_seconds() / 3600
+
+    # determine the penalty percentage based on the time left 
+    if hours_until_match >= 48:
+        penalty_percentage = 10  # more than 48 hours to the match: 10 percent
+    elif hours_until_match >= 24:
+        penalty_percentage = 30  # between 24 and 48 hrs : 30
+    elif hours_until_match >= 12:
+        penalty_percentage = 50  # between 12 and 24 hrs : 50 
+    else:
+        penalty_percentage = 100 # less than 12 hrs left : 100 
+
+    total_price = float(reservation["total_price"])
+    penalty_amount = int((total_price * penalty_percentage) / 100)
+    refund_amount = int(total_price - penalty_amount)
+
+    return {
+        "success": True,
+        "data": {
+            "reserve_id": reserve_id,
+            "total_price": total_price,
+            "penalty_percentage": penalty_percentage,
+            "penalty_amount": penalty_amount,
+            "refund_amount": refund_amount,
+            "rules": f"because the match is {hours_until_match:.2f} hours away, a {penalty_percentage}% penalty applies, which amounts to {penalty_amount} units. The refund amount will be {refund_amount} units."
+        },
+        "status_code": 200
+    }
