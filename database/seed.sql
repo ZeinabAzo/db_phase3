@@ -337,6 +337,11 @@ VALUES
 (10, 'Tabriz Club vs Local Regional Team',
  '2024-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
  '2024-06-17 08:00:00', 'Early season match with new team',
+ 1, NULL, NULL, 6),
+ 
+ (11, 'Tabriz Club vs Local Regional Team',
+ '2026-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
+ '2024-06-17 08:00:00', 'Early season match with new team',
  1, NULL, NULL, 6);
 
 -- ============================================================
@@ -618,3 +623,4 @@ VALUES
  NULL, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
+INSERT INTO ticket (ticket_id, price, `status`, created_at, updated_at,  match_id, seat_id, ticket_type_id, refund_policy_id) VALUES(12, 280000.00, 'available', '2024-06-15 10:00:00', '2024-06-17 08:00:00',  11, 10, 9, 2)
