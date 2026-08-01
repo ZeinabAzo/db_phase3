@@ -199,6 +199,7 @@ def get_reserve_by_id(
             r.status,
             r.created_at,
             r.expire_at,
+            r.total_price,
 
             u.user_id,
             u.first_name,

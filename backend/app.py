@@ -6,6 +6,8 @@ from routes.reserve import router as reserve_router
 from routes.user_router import router as user_router
 from routes.report_router import router as report_router
 from routes.admin_router import router as admin_router
+from routes.payment_router import router as payment_router
+
 
 
 
@@ -24,6 +26,7 @@ app.include_router(reserve_router)
 app.include_router(report_router)
 
 app.include_router(admin_router)
+app.include_router(payment_router)
 
 # first test
 @app.get("/")
