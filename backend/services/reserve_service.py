@@ -258,31 +258,49 @@ def _get_penalty_percentage(policy_id: int, hours_until_match: float) -> int:
 
     if policy_id == 1:
         # 1: Full Refund (7 days before)
-        if days_until_match >= 7: penalty_percentage = 0
+        if days_until_match >= 7: 
+            penalty_percentage = 0
+
     elif policy_id == 2:
-        # 2: Partial Refund 50% (3-7 days before)
-        if 3 <= days_until_match < 7: penalty_percentage = 50
+        # 2: Partial Refund 50% (3-7 days before event)
+        if days_until_match >= 7: 
+            penalty_percentage = 0  # Cancelled earlier than 7 days -> Full Refund
+        elif 3 <= days_until_match < 7: 
+            penalty_percentage = 50 # Cancelled within 3-7 days -> 50% Penalty
+
     elif policy_id == 3:
-        # 3: Partial Refund 25% (1-3 days before) -> 75% penalty
-        if 1 <= days_until_match < 3: penalty_percentage = 75 
+        # 3: Partial Refund 25% (1-3 days before event)
+        if days_until_match >= 3: 
+            penalty_percentage = 0  # Cancelled earlier than 3 days -> Full Refund
+        elif 1 <= days_until_match < 3: 
+            penalty_percentage = 75 # Cancelled within 1-3 days -> 75% Penalty (25% refund)
+
     elif policy_id == 4:
         # 4: No Refund
         penalty_percentage = 100
+
     elif policy_id == 5:
         # 5: Full Refund Until 24h
-        if hours_until_match >= 24: penalty_percentage = 0
+        if hours_until_match >= 24: 
+            penalty_percentage = 0
+
     elif policy_id == 6:
         # 6: Conditional Full Refund (must be cancelled by admin)
         penalty_percentage = 100
+
     elif policy_id == 7:
         # 7: Premium Exchange Only (no monetary refund)
         penalty_percentage = 100
+
     elif policy_id == 8:
         # 8: Weather Dependent
         penalty_percentage = 100 
+
     elif policy_id == 9:
         # 9: Senior Citizen Refund (3 days before)
-        if days_until_match >= 3: penalty_percentage = 0
+        if days_until_match >= 3: 
+            penalty_percentage = 0
+
     elif policy_id == 10:
         # 10: Group Booking Refund (requires support team review)
         penalty_percentage = 100
