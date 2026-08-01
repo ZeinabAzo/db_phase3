@@ -11,10 +11,14 @@ def get_reservation_for_cancellation(reserve_id: int, user_id: int):
                 r.reserve_id,
                 r.total_price,
                 r.status AS reserve_status,
-                m.start_time
+                m.start_time,
+                rp.refund_policy_id,
+                rp.name AS policy_name,
+                rp.desc AS policy_desc
             FROM reserve r
             JOIN ticket t ON r.ticket_id = t.ticket_id
             JOIN `match` m ON t.match_id = m.match_id
+            LEFT JOIN refund_policy rp ON t.refund_policy_id = rp.refund_policy_id
             WHERE r.reserve_id = %s AND r.user_id = %s
             LIMIT 1
         """

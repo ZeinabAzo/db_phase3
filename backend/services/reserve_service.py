@@ -246,37 +246,91 @@ def reservation_history(user_id):
 
 
 
+def _get_penalty_percentage(policy_id: int, hours_until_match: float) -> int:
+    """
+    Helper function to calculate the penalty percentage based on the cancellation policy
+    and the remaining time. Returns the penalty percentage (a number between 0 and 100).
+    """
+    days_until_match = hours_until_match / 24
+    
+    # Default: 100% penalty (no refund)
+    penalty_percentage = 100 
+
+    if policy_id == 1:
+        # 1: Full Refund (7 days before)
+        if days_until_match >= 7: penalty_percentage = 0
+    elif policy_id == 2:
+        # 2: Partial Refund 50% (3-7 days before)
+        if 3 <= days_until_match < 7: penalty_percentage = 50
+    elif policy_id == 3:
+        # 3: Partial Refund 25% (1-3 days before) -> 75% penalty
+        if 1 <= days_until_match < 3: penalty_percentage = 75 
+    elif policy_id == 4:
+        # 4: No Refund
+        penalty_percentage = 100
+    elif policy_id == 5:
+        # 5: Full Refund Until 24h
+        if hours_until_match >= 24: penalty_percentage = 0
+    elif policy_id == 6:
+        # 6: Conditional Full Refund (must be cancelled by admin)
+        penalty_percentage = 100
+    elif policy_id == 7:
+        # 7: Premium Exchange Only (no monetary refund)
+        penalty_percentage = 100
+    elif policy_id == 8:
+        # 8: Weather Dependent
+        penalty_percentage = 100 
+    elif policy_id == 9:
+        # 9: Senior Citizen Refund (3 days before)
+        if days_until_match >= 3: penalty_percentage = 0
+    elif policy_id == 10:
+        # 10: Group Booking Refund (requires support team review)
+        penalty_percentage = 100
+
+    return penalty_percentage
+
+
 def calculate_cancellation_penalty(reserve_id: int, user_id: int):
-    # get reserve info from database
+    # 1. Fetch reservation and ticket data from the database
     reservation = get_reservation_for_cancellation(reserve_id, user_id)
     
     if not reservation:
-        return {"success": False, "message": "A reservation with this id was not found, or is not yours.", "status_code": 404}
+        return {
+            "success": False, 
+            "message": "Reservation not found or does not belong to you.", 
+            "status_code": 404
+        }
         
     if reservation["reserve_status"] != "confirmed":
-        return {"success": False, "message": "Only confirmed reservations can be cancelled.", "status_code": 400}
+        return {
+            "success": False, 
+            "message": "Only confirmed reservations can be considered for cancellation.", 
+            "status_code": 400
+        }
 
-    # calculate the time left to the match
+    # 2. Check the match time
     start_time = reservation["start_time"]
     now = datetime.now()
     
     if start_time <= now:
-        return {"success": False, "message": "The match has already started(or passed), and cancellation is not possible.", "status_code": 400}
+        return {
+            "success": False, 
+            "message": "The match time has passed and cancellation is no longer possible.", 
+            "status_code": 400
+        }
 
-    # calculate the time difference in hours
+    # 3. Calculate remaining time
     time_difference = start_time - now
     hours_until_match = time_difference.total_seconds() / 3600
 
-    # determine the penalty percentage based on the time left 
-    if hours_until_match >= 48:
-        penalty_percentage = 10  # more than 48 hours to the match: 10 percent
-    elif hours_until_match >= 24:
-        penalty_percentage = 30  # between 24 and 48 hrs : 30
-    elif hours_until_match >= 12:
-        penalty_percentage = 50  # between 12 and 24 hrs : 50 
-    else:
-        penalty_percentage = 100 # less than 12 hrs left : 100 
+    policy_id = reservation.get("refund_policy_id")
+    policy_name = reservation.get("policy_name") or "No specific cancellation policy"
+    policy_desc = reservation.get("policy_desc") or ""
 
+    # 4. Call the helper function to get the penalty percentage
+    penalty_percentage = _get_penalty_percentage(policy_id, hours_until_match)
+
+    # 5. Calculate amounts
     total_price = float(reservation["total_price"])
     penalty_amount = int((total_price * penalty_percentage) / 100)
     refund_amount = int(total_price - penalty_amount)
@@ -286,10 +340,12 @@ def calculate_cancellation_penalty(reserve_id: int, user_id: int):
         "data": {
             "reserve_id": reserve_id,
             "total_price": total_price,
+            "policy_applied": policy_name,
+            "policy_description": policy_desc,
             "penalty_percentage": penalty_percentage,
             "penalty_amount": penalty_amount,
             "refund_amount": refund_amount,
-            "rules": f"because the match is {hours_until_match:.2f} hours away, a {penalty_percentage}% penalty applies, which amounts to {penalty_amount} units. The refund amount will be {refund_amount} units."
+            "rules": f"Policy ({policy_name}): Since there are {int(hours_until_match)} hours left until the match, your penalty is {penalty_percentage}%."
         },
         "status_code": 200
     }
