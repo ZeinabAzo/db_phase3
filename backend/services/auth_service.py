@@ -351,3 +351,75 @@ def verify_signup(
     "token_type": "bearer",
     "message": "Registration completed successfully."
 }
+
+def send_signin_otp(
+    identifier: str,
+    identifier_type: str
+):
+    user = get_user_by_identifier(
+        identifier=identifier,
+        identifier_type=identifier_type
+    )
+
+    if user is None:
+        return {
+            "success": False,
+            "message": "User not found."
+        }
+
+    generate_and_save_otp(identifier)
+
+    return {
+        "success": True,
+        "message": "OTP sent successfully."
+    }
+
+def verify_signin_otp(
+    identifier: str,
+    identifier_type: str,
+    otp_code: str
+):
+    redis_db = get_redis()
+
+    stored_otp = redis_db.get(
+        f"otp:{identifier}"
+    )
+
+    if stored_otp is None:
+        return {
+            "success": False,
+            "message": "OTP has expired."
+        }
+
+    if stored_otp != otp_code:
+        return {
+            "success": False,
+            "message": "Invalid OTP code."
+        }
+
+    user = get_user_by_identifier(
+        identifier=identifier,
+        identifier_type=identifier_type
+    )
+
+    if user is None:
+        return {
+            "success": False,
+            "message": "User not found."
+        }
+
+    redis_db.delete(
+        f"otp:{identifier}"
+    )
+
+    access_token = create_access_token(
+        user_id=user["user_id"]
+    )
+
+    return {
+        "success": True,
+        "user_id": user["user_id"],
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Login successful."
+    }

@@ -7,7 +7,9 @@ from services.auth_service import (
     generate_and_save_otp,
     verify_otp_code,
     register_user,
-    login_user
+    login_user,
+    send_signin_otp,
+    verify_signin_otp
 )
 from models.Register import RegisterRequest
 from models.auth_model import (
@@ -20,35 +22,39 @@ from models.user_model import LoginRequest
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 #---------------------------------------------------------------------------------------------------------------
-# @router.post("/send-otp")
-# def send_otp(request: OTPRequest):
+@router.post("/signin/send-otp")
+def send_login_otp(request: OTPRequest):
 
-#     # call the service function to generate and save the OTP in Redis
-#     # we wrote this function in the auth_service.py file to handle the OTP generation and storage in Redis
-#     generate_and_save_otp(request.identifier)
+    result = send_signin_otp(
+        identifier=request.identifier,
+        identifier_type=request.identifier_type
+    )
 
-#     return {
-#         "status": "success",
-#         "message": f"OTP has been sent to {request.identifier}. Please check your console for the OTP code. Expires in 3 minutes."
-#     }
+    if not result["success"]:
+        raise HTTPException(
+            status_code=400,
+            detail=result["message"]
+        )
+
+    return result
 
 
-# @router.post("/verify-otp")# api to verify otp
-# def verify_otp(request: VerifyOTPRequest):
+@router.post("/signin/verify-otp")
+def verify_login_otp(request: VerifyOTPRequest):
 
-#     result = verify_otp_code(
-#         identifier=request.identifier,
-#         identifier_type=request.identifier_type,
-#         otp_code=request.code
-#     )
+    result = verify_signin_otp(
+        identifier=request.identifier,
+        identifier_type=request.identifier_type,
+        otp_code=request.code
+    )
 
-#     if not result["success"]:
-#         raise HTTPException(
-#             status_code=400,
-#             detail=result["message"]
-#         )
+    if not result["success"]:
+        raise HTTPException(
+            status_code=401,
+            detail=result["message"]
+        )
 
-#     return result
+    return result
 
 
 
