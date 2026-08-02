@@ -2,6 +2,10 @@ from db.database import get_connection
 from datetime import datetime, timedelta
 from repositories.reserve_repository import get_reservation_for_cancellation, cancel_reservation_and_free_ticket
 
+from repositories.admin_repository import (
+    get_payment_by_reserve_id,
+    create_refund,
+)
 
 def reserve_ticket(user_id, ticket_id):
     cursor = None
@@ -161,6 +165,7 @@ def active_reservations(user_id):
             where r.user_id = %s
               and r.status = 'pending'
               and r.expire_at > now()
+
 
             order by r.created_at desc
             """,
@@ -446,6 +451,16 @@ def cancel_ticket_and_refund(reserve_id: int, user_id: int):
     refund_amount = penalty_check["data"]["refund_amount"]
     
     # if in the future we add some wallet, the adding to it part will be written here.
+
+    payment = get_payment_by_reserve_id(
+            reserve_id
+    )
+
+    create_refund(
+            payment_id=payment["payment_id"],
+            amount=refund_amount,
+            reason="canceled by user"
+    )
 
     return {
         "success": True,

@@ -141,13 +141,11 @@ def search_ticket(
         return tickets
 
     finally:
-        if cursor:
+        if cursor is not None:
             cursor.close()
 
-        if 'data_connection' in locals():
+        if 'data_connection' in locals() and data_connection is not None:
             data_connection.close()
-        cursor.close()
-        data_connection.close()
 
 
 def get_ticket_details(ticket_id: int):

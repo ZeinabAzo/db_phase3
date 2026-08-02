@@ -144,7 +144,7 @@ VALUES
 
 (10, 'Nasrin', 'Ebrahimi', 'nasrin.student@email.com', '09134567890',
  SHA2('StudentPass24!', 256), '/images/user10.jpg', 'active',
- '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6,
+ '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6),
 
  (11,'super_admin1234','super_admin1234','super_admin1234@email.com',null,
  '$2b$12$35Hp58Pxvqw/RvksbPHMMeHxt2vGuMb5PHWiB3xI7zQOsAfdjT5kC',
@@ -289,60 +289,114 @@ INSERT INTO `match`
 (match_id, match_data, start_time, created_at, `status`, updated_at,
  `desc`, sport_type_id, home_team_id, away_team_id, stadium_id)
 VALUES
-(1, 'Persepolis vs Esteghlal - Derby Match',
- '2024-07-15 19:00:00', '2024-06-01 10:00:00', 'scheduled',
- '2024-06-15 14:30:00', 'Historic Tehran Derby, heavily anticipated',
+
+-- =========================
+-- Past matches
+-- =========================
+
+(1,
+ 'Persepolis vs Esteghlal Derby',
+ '2025-02-15 19:00:00',
+ '2025-01-01 10:00:00',
+ 'finished',
+ '2025-02-15 22:00:00',
+ 'Historic Tehran derby',
  1, 1, 2, 1),
 
-(2, 'Sepahan vs Foolad',
- '2024-06-18 17:30:00', '2024-06-01 10:00:00', 'finished',
- '2024-06-18 20:45:00', 'Regional match completed',
+
+(2,
+ 'Sepahan vs Foolad',
+ '2025-04-10 17:30:00',
+ '2025-03-01 09:00:00',
+ 'finished',
+ '2025-04-10 20:00:00',
+ 'Iran football league match',
  1, 3, 4, 8),
 
-(3, 'Iran National Basketball vs Asian Opponent',
- '2024-08-20 18:00:00', '2024-05-15 09:00:00', 'scheduled',
- '2024-06-16 11:00:00', 'International basketball championship qualifier',
- 3, 6, NULL, 2),
 
-(4, 'Saba Battery vs Iranian Women Volleyball',
- '2024-07-22 15:00:00', '2024-06-01 10:00:00', 'cancelled',
- '2024-06-10 12:00:00', 'Cancelled due to injury of key player',
+(3,
+ 'Iran Basketball vs National Team',
+ '2025-06-20 18:00:00',
+ '2025-05-01 10:00:00',
+ 'finished',
+ '2025-06-20 21:00:00',
+ 'International basketball event',
+ 3, 6, 7, 2),
+
+
+(4,
+ 'Saba Volleyball vs Iran Women Team',
+ '2025-08-05 15:00:00',
+ '2025-07-01 10:00:00',
+ 'finished',
+ '2025-08-05 17:00:00',
+ 'National volleyball tournament',
  2, 5, 9, 3),
 
-(5, 'Persepolis Youth vs Esteghlal Youth Academy',
- '2024-06-20 16:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-15 10:00:00', 'Youth league match',
- 1, 8, NULL, 1),
 
-(6, 'Mixed Doubles Tennis Championship - Semifinal',
- '2024-07-05 14:00:00', '2024-05-20 09:00:00', 'finished',
- '2024-07-05 16:30:00', 'National tennis championship semifinal',
- 9, 10, NULL, 5),
+(5,
+ 'Persepolis Youth vs Esteghlal Youth',
+ '2025-11-12 16:00:00',
+ '2025-10-01 10:00:00',
+ 'finished',
+ '2025-11-12 18:00:00',
+ 'Youth league match',
+ 1, 8, 7, 1),
 
-(7, 'Cycling Tour Stage 3',
- '2024-08-10 08:00:00', '2024-07-01 10:00:00', 'scheduled',
- '2024-06-16 15:00:00', 'Multi-day cycling tour stage',
- 6, NULL, NULL, 9),
 
-(8, 'Esports Championship Final - CS:GO',
- '2024-07-30 20:00:00', '2024-06-01 10:00:00', 'scheduled',
- '2024-06-17 09:00:00', 'Professional esports championship final',
- 10, NULL, NULL, 2),
 
-(9, 'Sepahan vs Esteghlal',
- '2024-06-25 19:30:00', '2024-06-10 10:00:00', 'scheduled',
- '2024-06-15 14:00:00', 'Match postponed due to weather forecast',
- 1, 3, 2, 4),
+-- =========================
+-- Future matches
+-- =========================
 
-(10, 'Tabriz Club vs Local Regional Team',
- '2024-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-17 08:00:00', 'Early season match with new team',
- 1, NULL, NULL, 6),
- 
- (11, 'Tabriz Club vs Local Regional Team',
- '2026-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-17 08:00:00', 'Early season match with new team',
- 1, NULL, NULL, 6);
+(6,
+ 'Persepolis vs Sepahan',
+ '2026-09-10 19:00:00',
+ '2026-07-01 10:00:00',
+ 'scheduled',
+ '2026-07-01 10:00:00',
+ 'Upcoming football match',
+ 1, 1, 3, 1),
+
+
+(7,
+ 'Esteghlal vs Foolad',
+ '2026-10-05 18:30:00',
+ '2026-07-15 10:00:00',
+ 'scheduled',
+ '2026-07-15 10:00:00',
+ 'League match',
+ 1, 2, 4, 7),
+
+
+(8,
+ 'Iran Basketball vs Shahr Arak',
+ '2026-11-20 20:00:00',
+ '2026-08-01 09:00:00',
+ 'scheduled',
+ '2026-08-01 09:00:00',
+ 'Basketball championship',
+ 3, 6, 7, 2),
+
+
+(9,
+ 'Saba Volleyball vs Female Iran Volleyball',
+ '2026-12-15 17:00:00',
+ '2026-08-10 10:00:00',
+ 'scheduled',
+ '2026-08-10 10:00:00',
+ 'Volleyball final',
+ 2, 5, 9, 3),
+
+
+(10,
+ 'Sepahan vs Esteghlal',
+ '2027-01-25 19:30:00',
+ '2026-09-01 10:00:00',
+ 'scheduled',
+ '2026-09-01 10:00:00',
+ 'Future football match',
+ 1, 3, 2, 4);
 
 -- ============================================================
 -- LEVEL 6
@@ -623,4 +677,3 @@ VALUES
  NULL, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
-INSERT INTO ticket (ticket_id, price, `status`, created_at, updated_at,  match_id, seat_id, ticket_type_id, refund_policy_id) VALUES(12, 280000.00, 'available', '2024-06-15 10:00:00', '2024-06-17 08:00:00',  11, 10, 9, 2)
