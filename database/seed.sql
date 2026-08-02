@@ -144,7 +144,7 @@ VALUES
 
 (10, 'Nasrin', 'Ebrahimi', 'nasrin.student@email.com', '09134567890',
  SHA2('StudentPass24!', 256), '/images/user10.jpg', 'active',
- '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6,
+ '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6),
 
  (11,'super_admin1234','super_admin1234','super_admin1234@email.com',null,
  '$2b$12$35Hp58Pxvqw/RvksbPHMMeHxt2vGuMb5PHWiB3xI7zQOsAfdjT5kC',

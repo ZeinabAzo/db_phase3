@@ -107,7 +107,7 @@ def cancel_reserve_by_admin_service(
         create_refund(
             payment_id=payment["payment_id"],
             amount=payment["amount"],
-            reason=reason
+            reason="canceled by admin -> "+ reason
         )
 
         refund_created = True

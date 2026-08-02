@@ -1,6 +1,5 @@
 from fastapi import APIRouter  , Depends, HTTPException
 from services.reserve_service import reserve_ticket , active_reservations, reservation_history, calculate_cancellation_penalty, cancel_ticket_and_refund , purchased_tickets
-from utils.security import get_current_user
 from utils.dependencies import get_current_user
 
 router = APIRouter(
