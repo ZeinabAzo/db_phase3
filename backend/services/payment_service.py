@@ -90,7 +90,6 @@ def payment_callback_service(
     payment_status: str
 ):
 
-    # پیدا کردن payment
     payment = get_payment_by_transaction_id(
         transaction_id
     )
@@ -102,7 +101,6 @@ def payment_callback_service(
         )
 
 
-    # جلوگیری از پردازش دوباره
     if payment["payment_status"] != "pending":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -113,7 +111,6 @@ def payment_callback_service(
     reserve_id = payment["reservation_id"]
 
 
-    # گرفتن رزرو
     reserve = get_reserve_by_id(
         reserve_id
     )
@@ -125,7 +122,6 @@ def payment_callback_service(
         )
 
 
-    # پرداخت موفق
     if payment_status == "completed":
 
         complete_payment_transaction(
@@ -141,7 +137,6 @@ def payment_callback_service(
         }
 
 
-    # پرداخت ناموفق
     elif payment_status == "failed":
 
         update_payment_status(
