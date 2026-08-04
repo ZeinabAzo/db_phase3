@@ -1,6 +1,5 @@
 from fastapi import APIRouter  , Depends, HTTPException
-from services.reserve_service import reserve_ticket , active_reservations, reservation_history, calculate_cancellation_penalty, cancel_ticket_and_refund
-from utils.security import get_current_user
+from services.reserve_service import reserve_ticket , active_reservations, reservation_history, calculate_cancellation_penalty, cancel_ticket_and_refund , purchased_tickets
 from utils.dependencies import get_current_user
 
 router = APIRouter(
@@ -55,3 +54,8 @@ def cancel_reservation(
         raise HTTPException(status_code=result["status_code"], detail=result["message"])
         
     return result
+
+
+@router.get("/purchased_tickets")
+def purchased(current_user: int = Depends(get_current_user)):
+    return purchased_tickets(current_user)

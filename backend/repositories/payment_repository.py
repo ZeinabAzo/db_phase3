@@ -251,7 +251,6 @@ def complete_payment_transaction(
 
     try:
 
-        # تغییر وضعیت payment
         payment_query = """
             UPDATE payment
             SET payment_status = 'completed',
@@ -265,7 +264,6 @@ def complete_payment_transaction(
         )
 
 
-        # تایید رزرو
         reserve_query = """
             UPDATE reserve
             SET status = 'confirmed',
@@ -280,7 +278,6 @@ def complete_payment_transaction(
         )
 
 
-        # فروخته شدن بلیت
         ticket_query = """
             UPDATE ticket
             SET status = 'sold'

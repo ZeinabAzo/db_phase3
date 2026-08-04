@@ -3,6 +3,11 @@ from datetime import datetime, timedelta
 from repositories.reserve_repository import get_reservation_for_cancellation, cancel_reservation_and_free_ticket
 from repositories.ticket_repository import sync_single_ticket_to_es 
 
+from repositories.admin_repository import (
+    get_payment_by_reserve_id,
+    create_refund,
+)
+
 def reserve_ticket(user_id, ticket_id):
     cursor = None
 
@@ -52,9 +57,12 @@ def reserve_ticket(user_id, ticket_id):
 
         cursor.execute(
             """
-            select ticket_id, price, status
-            from ticket
-            where ticket_id = %s
+            select 
+            t.ticket_id , t.price, t.status, m.start_time
+            from ticket t
+            inner join `match` m
+            on t.match_id = m.match_id
+            where t.ticket_id = %s
             """,
             (ticket_id,),
         )
@@ -71,6 +79,11 @@ def reserve_ticket(user_id, ticket_id):
             return {
                 "success": False,
                 "message": "Ticket is not available",
+            }
+
+        if ticket["start_time"] <= datetime.now():
+            return{
+                "success" : False, "message" : "match has already startted or finished. reservation is not allowed."
             }
 
         created_at = datetime.now()
@@ -155,6 +168,7 @@ def active_reservations(user_id):
             where r.user_id = %s
               and r.status = 'pending'
               and r.expire_at > now()
+
 
             order by r.created_at desc
             """,
@@ -246,6 +260,54 @@ def reservation_history(user_id):
         if "data_connection" in locals():
             data_connection.close()
 
+
+
+def purchased_tickets(user_id):
+    cursor = None
+
+    try:
+        data_connection = get_connection()
+        cursor = data_connection.cursor(dictionary = True)
+
+        cursor.execute(
+            """
+            select 
+            r.reserve_id, r.ticket_id, r.total_price, r.created_at, r.confirmed_at,
+            t.price,
+            m.match_id, m.start_time,
+            home.name as home_team,
+            away.name as away_team
+
+            from reserve r
+            inner join ticket t
+            on r.ticket_id = t.ticket_id
+
+            inner join `match` m
+            on t.match_id = m.match_id
+
+            inner join team home
+            on m.home_team_id = home.team_id
+
+            inner join team away
+            on m.away_team_id = away.team_id
+
+            where r.user_id =  %s and r.status ='confirmed'
+            order by r.confirmed_at desc""", (user_id,)
+        )
+
+        tickets = cursor.fetchall()
+
+        return{
+            "success": True, "data":tickets
+        }
+    except Exception:
+        return {"success" : False, "message": "failed to get purchased tickets"}
+    finally:
+        if cursor:
+            cursor.close()
+
+        if "data_connection" in locals():
+            data_connection.close()
 
 
 def _get_penalty_percentage(policy_id: int, hours_until_match: float) -> int:
@@ -392,6 +454,16 @@ def cancel_ticket_and_refund(reserve_id: int, user_id: int):
     refund_amount = penalty_check["data"]["refund_amount"]
     
     # if in the future we add some wallet, the adding to it part will be written here.
+
+    payment = get_payment_by_reserve_id(
+            reserve_id
+    )
+
+    create_refund(
+            payment_id=payment["payment_id"],
+            amount=refund_amount,
+            reason="canceled by user"
+    )
 
     return {
         "success": True,
