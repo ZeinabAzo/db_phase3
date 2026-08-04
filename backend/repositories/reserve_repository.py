@@ -1,4 +1,5 @@
 from db.database import get_connection
+from repositories.ticket_repository import sync_single_ticket_to_es 
 
 def get_reservation_for_cancellation(reserve_id: int, user_id: int):
     connection = get_connection()
@@ -64,6 +65,7 @@ def cancel_reservation_and_free_ticket(reserve_id: int, user_id: int):
 
         # transaction commit to save the changes in the database
         connection.commit()
+        sync_single_ticket_to_es(ticket_id)
         return True
 
     except Exception as e:

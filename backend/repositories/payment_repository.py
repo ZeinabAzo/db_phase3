@@ -1,4 +1,5 @@
 from db.database import get_connection
+from repositories.ticket_repository import sync_single_ticket_to_es
 
 
 def create_payment(
@@ -290,6 +291,7 @@ def complete_payment_transaction(
 
 
         connection.commit()
+        sync_single_ticket_to_es(ticket_id)
 
 
     except Exception:
