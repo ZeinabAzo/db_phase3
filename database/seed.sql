@@ -144,7 +144,7 @@ VALUES
 
 (10, 'Nasrin', 'Ebrahimi', 'nasrin.student@email.com', '09134567890',
  SHA2('StudentPass24!', 256), '/images/user10.jpg', 'active',
- '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6,
+ '2024-04-02 14:00:00', '2024-06-17 16:30:00', 7, 6),
 
  (11,'super_admin1234','super_admin1234','super_admin1234@email.com',null,
  '$2b$12$35Hp58Pxvqw/RvksbPHMMeHxt2vGuMb5PHWiB3xI7zQOsAfdjT5kC',
@@ -267,6 +267,20 @@ VALUES
 (9, 'Stadium Suite', 100, 'Private suite with bar and restaurant access', 3.50, 1),
 (10, 'General Admission', 4000, 'Standing room only, general admission', 0.50, 1);
 
+INSERT INTO section
+(section_id,name,capacity,`desc`,price_multiplier,stadium_id)
+VALUES
+(11,'North VIP',700,'VIP North',2.20,2),
+(12,'South Stand',3500,'General seating',1.00,2),
+(13,'East Premium',1000,'Premium seats',1.80,3),
+(14,'West Stand',2800,'Standard section',1.00,3),
+(15,'Family Zone',900,'Family seating',1.20,4),
+(16,'Gold Lounge',250,'Luxury lounge',3.80,4),
+(17,'Upper East',2500,'Economy seats',0.80,5),
+(18,'Lower West',1800,'Close to field',1.40,6),
+(19,'VIP Box',120,'Private box',4.50,7),
+(20,'Student Zone',1500,'Discount section',0.70,8);
+
 -- ============================================================
 -- LEVEL 5
 -- ============================================================
@@ -289,60 +303,192 @@ INSERT INTO `match`
 (match_id, match_data, start_time, created_at, `status`, updated_at,
  `desc`, sport_type_id, home_team_id, away_team_id, stadium_id)
 VALUES
-(1, 'Persepolis vs Esteghlal - Derby Match',
- '2024-07-15 19:00:00', '2024-06-01 10:00:00', 'scheduled',
- '2024-06-15 14:30:00', 'Historic Tehran Derby, heavily anticipated',
+
+
+(1,
+ 'Persepolis vs Esteghlal Derby',
+ '2026-09-18 18:30:00',
+ '2025-01-01 10:00:00',
+ 'finished',
+ '2025-02-15 22:00:00',
+ 'Historic Tehran derby',
  1, 1, 2, 1),
 
-(2, 'Sepahan vs Foolad',
- '2024-06-18 17:30:00', '2024-06-01 10:00:00', 'finished',
- '2024-06-18 20:45:00', 'Regional match completed',
+
+(2,
+ 'Sepahan vs Foolad',
+ '2026-09-18 18:30:00',
+ '2025-03-01 09:00:00',
+ 'finished',
+ '2025-04-10 20:00:00',
+ 'Iran football league match',
  1, 3, 4, 8),
 
-(3, 'Iran National Basketball vs Asian Opponent',
- '2024-08-20 18:00:00', '2024-05-15 09:00:00', 'scheduled',
- '2024-06-16 11:00:00', 'International basketball championship qualifier',
- 3, 6, NULL, 2),
 
-(4, 'Saba Battery vs Iranian Women Volleyball',
- '2024-07-22 15:00:00', '2024-06-01 10:00:00', 'cancelled',
- '2024-06-10 12:00:00', 'Cancelled due to injury of key player',
+(3,
+ 'Iran Basketball vs National Team',
+ '2026-09-18 18:30:00',
+ '2025-05-01 10:00:00',
+ 'finished',
+ '2025-06-20 21:00:00',
+ 'International basketball event',
+ 3, 6, 7, 2),
+
+
+(4,
+ 'Saba Volleyball vs Iran Women Team',
+ '2026-09-18 18:30:00',
+ '2025-07-01 10:00:00',
+ 'finished',
+ '2025-08-05 17:00:00',
+ 'National volleyball tournament',
  2, 5, 9, 3),
 
-(5, 'Persepolis Youth vs Esteghlal Youth Academy',
- '2024-06-20 16:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-15 10:00:00', 'Youth league match',
- 1, 8, NULL, 1),
 
-(6, 'Mixed Doubles Tennis Championship - Semifinal',
- '2024-07-05 14:00:00', '2024-05-20 09:00:00', 'finished',
- '2024-07-05 16:30:00', 'National tennis championship semifinal',
- 9, 10, NULL, 5),
+(5,
+ 'Persepolis Youth vs Esteghlal Youth',
+ '2026-09-18 18:30:00',
+ '2025-10-01 10:00:00',
+ 'finished',
+ '2025-11-12 18:00:00',
+ 'Youth league match',
+ 1, 8, 7, 1),
 
-(7, 'Cycling Tour Stage 3',
- '2024-08-10 08:00:00', '2024-07-01 10:00:00', 'scheduled',
- '2024-06-16 15:00:00', 'Multi-day cycling tour stage',
- 6, NULL, NULL, 9),
 
-(8, 'Esports Championship Final - CS:GO',
- '2024-07-30 20:00:00', '2024-06-01 10:00:00', 'scheduled',
- '2024-06-17 09:00:00', 'Professional esports championship final',
- 10, NULL, NULL, 2),
 
-(9, 'Sepahan vs Esteghlal',
- '2024-06-25 19:30:00', '2024-06-10 10:00:00', 'scheduled',
- '2024-06-15 14:00:00', 'Match postponed due to weather forecast',
- 1, 3, 2, 4),
+(6,
+ 'Persepolis vs Sepahan',
+ '2026-09-10 19:00:00',
+ '2026-07-01 10:00:00',
+ 'scheduled',
+ '2026-07-01 10:00:00',
+ 'Upcoming football match',
+ 1, 1, 3, 1),
 
-(10, 'Tabriz Club vs Local Regional Team',
- '2024-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-17 08:00:00', 'Early season match with new team',
- 1, NULL, NULL, 6),
- 
- (11, 'Tabriz Club vs Local Regional Team',
- '2026-09-05 17:00:00', '2024-06-15 10:00:00', 'scheduled',
- '2024-06-17 08:00:00', 'Early season match with new team',
- 1, NULL, NULL, 6);
+
+(7,
+ 'Esteghlal vs Foolad',
+ '2026-10-05 18:30:00',
+ '2026-07-15 10:00:00',
+ 'scheduled',
+ '2026-07-15 10:00:00',
+ 'League match',
+ 1, 2, 4, 7),
+
+
+(8,
+ 'Iran Basketball vs Shahr Arak',
+ '2026-11-20 20:00:00',
+ '2026-08-01 09:00:00',
+ 'scheduled',
+ '2026-08-01 09:00:00',
+ 'Basketball championship',
+ 3, 6, 7, 2),
+
+
+(9,
+ 'Saba Volleyball vs Female Iran Volleyball',
+ '2026-12-15 17:00:00',
+ '2026-08-10 10:00:00',
+ 'scheduled',
+ '2026-08-10 10:00:00',
+ 'Volleyball final',
+ 2, 5, 9, 3),
+
+
+(10,
+ 'Sepahan vs Esteghlal',
+ '2027-01-25 19:30:00',
+ '2026-09-01 10:00:00',
+ 'scheduled',
+ '2026-09-01 10:00:00',
+ 'Future football match',
+ 1, 3, 2, 4);
+
+ INSERT INTO `match`
+(match_id,match_data,start_time,created_at,`status`,updated_at,
+`desc`,sport_type_id,home_team_id,away_team_id,stadium_id)
+VALUES
+
+(11,'Persepolis vs Tractor',
+'2026-09-18 18:30:00',
+'2026-08-01 10:00:00',
+'scheduled',
+'2026-08-01 10:00:00',
+'League Match',
+1,1,10,1),
+
+(12,'Esteghlal vs Sepahan',
+'2026-09-25 19:00:00',
+'2026-08-02 10:00:00',
+'scheduled',
+'2026-08-02 10:00:00',
+'Top League',
+1,2,3,8),
+
+(13,'Foolad vs Persepolis',
+'2026-10-03 20:00:00',
+'2026-08-05 10:00:00',
+'scheduled',
+'2026-08-05 10:00:00',
+'League',
+1,4,1,7),
+
+(14,'Iran Basketball vs Saba',
+'2026-10-15 18:00:00',
+'2026-08-07 09:00:00',
+'scheduled',
+'2026-08-07 09:00:00',
+'Basketball Cup',
+3,6,5,2),
+
+(15,'Women Volleyball Final',
+'2026-10-28 17:00:00',
+'2026-08-10 09:00:00',
+'scheduled',
+'2026-08-10 09:00:00',
+'Volleyball Final',
+2,9,5,3),
+
+(16,'Sepahan vs Tractor',
+'2026-11-06 19:30:00',
+'2026-08-12 09:00:00',
+'scheduled',
+'2026-08-12 09:00:00',
+'League',
+1,3,10,4),
+
+(17,'Esteghlal vs Persepolis',
+'2026-11-20 18:45:00',
+'2026-08-15 09:00:00',
+'scheduled',
+'2026-08-15 09:00:00',
+'Tehran Derby',
+1,2,1,1),
+
+(18,'Basketball Championship',
+'2026-12-05 19:00:00',
+'2026-08-18 09:00:00',
+'scheduled',
+'2026-08-18 09:00:00',
+'National League',
+3,7,6,2),
+
+(19,'Volleyball League',
+'2026-12-18 17:30:00',
+'2026-08-20 09:00:00',
+'scheduled',
+'2026-08-20 09:00:00',
+'League',
+2,5,9,3),
+
+(20,'Persepolis vs Foolad',
+'2027-01-10 19:30:00',
+'2026-09-01 09:00:00',
+'scheduled',
+'2026-09-01 09:00:00',
+'Opening Match',
+1,1,4,1);
 
 -- ============================================================
 -- LEVEL 6
@@ -382,6 +528,35 @@ VALUES
 (10, 280000.00, 'available', '2024-06-15 10:00:00', '2024-06-17 08:00:00',
  10, 10, 9, 2);
 
+ INSERT INTO ticket
+(ticket_id,price,`status`,created_at,updated_at,
+match_id,seat_id,ticket_type_id,refund_policy_id)
+VALUES
+
+(11,450000,'available',NOW(),NOW(),11,1,1,1),
+(12,900000,'available',NOW(),NOW(),11,6,6,1),
+
+(13,400000,'available',NOW(),NOW(),12,2,2,1),
+(14,950000,'available',NOW(),NOW(),12,7,6,1),
+
+(15,350000,'available',NOW(),NOW(),13,3,1,2),
+(16,1000000,'available',NOW(),NOW(),13,6,6,2),
+
+(17,250000,'available',NOW(),NOW(),14,4,3,3),
+(18,1200000,'available',NOW(),NOW(),14,7,6,3),
+
+(19,180000,'available',NOW(),NOW(),15,5,3,4),
+(20,500000,'available',NOW(),NOW(),16,9,1,1),
+
+(21,450000,'available',NOW(),NOW(),17,1,1,1),
+(22,1200000,'available',NOW(),NOW(),17,6,6,1),
+
+(23,220000,'available',NOW(),NOW(),18,4,5,5),
+(24,300000,'available',NOW(),NOW(),19,5,3,2),
+
+(25,450000,'available',NOW(),NOW(),20,2,1,1),
+(26,950000,'available',NOW(),NOW(),20,7,6,1);
+
 INSERT INTO ticket_feature (feature_id, ticket_id) VALUES
 (2, 1),
 (3, 2),
@@ -393,6 +568,8 @@ INSERT INTO ticket_feature (feature_id, ticket_id) VALUES
 (7, 3),
 (5, 7),
 (9, 9);
+
+
 
 -- ============================================================
 -- LEVEL 7
@@ -623,4 +800,4 @@ VALUES
  NULL, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
-INSERT INTO ticket (ticket_id, price, `status`, created_at, updated_at,  match_id, seat_id, ticket_type_id, refund_policy_id) VALUES(12, 280000.00, 'available', '2024-06-15 10:00:00', '2024-06-17 08:00:00',  11, 10, 9, 2)
+

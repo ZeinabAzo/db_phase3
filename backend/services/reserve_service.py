@@ -1,7 +1,7 @@
 from db.database import get_connection
 from datetime import datetime, timedelta
 from repositories.reserve_repository import get_reservation_for_cancellation, cancel_reservation_and_free_ticket
-
+from repositories.ticket_repository import sync_single_ticket_to_es 
 
 def reserve_ticket(user_id, ticket_id):
     cursor = None
@@ -48,6 +48,7 @@ def reserve_ticket(user_id, ticket_id):
             )
 
             data_connection.commit()
+            sync_single_ticket_to_es(ticket_id)
 
         cursor.execute(
             """
@@ -100,6 +101,7 @@ def reserve_ticket(user_id, ticket_id):
         )
 
         data_connection.commit()
+        sync_single_ticket_to_es(ticket_id)
 
         return {
             "success": True,
