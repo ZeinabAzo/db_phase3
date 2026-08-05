@@ -74,3 +74,54 @@ def remove_ticket_from_es(ticket_id: int):
         es.delete(index="tickets", id=ticket_id, ignore=[404])
     except Exception as e:
         print(f"ES Delete Error for ticket {ticket_id}: {e}")
+
+
+
+def get_tickets_by_match(match_id: int):
+    
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+
+        query = """
+            SELECT
+                t.ticket_id,
+                t.price,
+                t.status,
+
+                s.seat_id,
+                s.row_number,
+                s.seat_number,
+                s.seat_type,
+
+                sec.name AS section_name
+
+            FROM ticket t
+
+            JOIN seat s
+                ON t.seat_id = s.seat_id
+
+            JOIN section sec
+                ON s.section_id = sec.section_id
+
+            WHERE t.match_id = %s
+
+            ORDER BY 
+                s.row_number,
+                s.seat_number
+        """
+
+
+        cursor.execute(
+            query,
+            (match_id,)
+        )
+
+
+        return cursor.fetchall()
+
+
+    finally:
+        cursor.close()
+        connection.close()

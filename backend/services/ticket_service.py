@@ -1,8 +1,9 @@
 from db.database import get_connection
 import json
 from cache.redis_client import get_redis
-from db.database import get_connection
-
+#from db.database import get_connection
+from repositories.ticket_repository import get_tickets_by_match
+from utils.es_client import get_es_client
 
 def search_ticket(
     city=None,
@@ -14,13 +15,82 @@ def search_ticket(
     ticket_type=None,
     min_price=None,
     max_price=None,
+    query=None,
 ):
 
-    cursor = None
+    #cursor = None
 
     try:
-        data_connection = get_connection()
+        #data_connection = get_connection()
         redis = get_redis()
+        es = get_es_client()
+        must_queries = []
+
+        if city:
+            must_queries.append({"term":{"city_name": city}})
+
+
+        if sport_type:
+            must_queries.append({
+                "term": {
+                    "sport_name" : sport_type
+                }
+            })
+
+        if venue:
+            must_queries.append({
+                "match":{
+                    "venue_name": venue
+                }
+            })
+
+        if home_team:
+            must_queries.append({
+                "match" : {
+                    "home_team_name" : home_team
+                }
+            })
+
+        if away_team:
+            must_queries.append({
+                "match" : {
+                    "away_team_name" : away_team
+                }
+            })
+
+        if ticket_type:
+            must_queries.append({
+                "term" : {
+                    "ticket_type" : ticket_type
+                }
+            })
+
+        if min_price is not None:
+            must_queries.append({
+                "range":{"price" :{"gte" : min_price}}
+            })
+
+        if max_price is not None:
+            must_queries.append({
+                "range" : {
+                    "price" : {"lte" : max_price}
+                }
+            })
+
+        if query:
+            must_queries.append({
+                "multi_match": {
+                    "query": query,
+                    "fields": [
+                        "home_team_name","away_team_name","venue_name","stadium_name"],"fuzziness": "AUTO"
+                        }})
+
+        if date:
+            must_queries.append({
+            "term": {"start_time": date}
+        })
+
+
 
         cache_key = (
             f"search_ticket:"
@@ -32,105 +102,25 @@ def search_ticket(
         if cached_data:
             return json.loads(cached_data)
 
-        cursor = data_connection.cursor(dictionary=True)
+        search_query = {
+            "bool":{
+                "must" : must_queries, "filter" : [
+                    {
+                        "term" :{"status": "available"}
+                    }
+                ]
+            }
+        }
+        response = es.search(
+            index = "tickets", query = search_query, sort = [
+                {"start_time" : "asc"}, {"price": "asc"}
+            ]
+        )
 
-        query = """
-            select
-                t.ticket_id,
-                t.price,
-                t.status as ticket_status,
+        tickets = []
 
-                tt.ticket_type,
-
-                m.match_id,
-                m.start_time,
-                m.status as match_status,
-
-                st.name as sport_type,
-
-                ht.name as home_team,
-                at.name as away_team,
-
-                s.name as stadium,
-                v.name as venue,
-                c.name as city
-
-            from ticket t
-
-            inner join `match` m
-                on t.match_id = m.match_id
-
-            inner join sport_type st
-                on m.sport_type_id = st.sport_type_id
-
-            inner join team ht
-                on m.home_team_id = ht.team_id
-
-            inner join team at
-                on m.away_team_id = at.team_id
-
-            inner join stadium s
-                on m.stadium_id = s.stadium_id
-
-            inner join venue v
-                on s.venue_id = v.venue_id
-
-            inner join city c
-                on v.city_id = c.city_id
-
-            left join ticket_type tt
-                on t.ticket_type_id = tt.ticket_type_id
-
-            where t.status = 'available'
-        """
-
-        params = []
-
-        if city:
-            query += " and c.name = %s"
-            params.append(city)
-
-        if sport_type:
-            query += " and st.name = %s"
-            params.append(sport_type)
-
-        if venue:
-            query += " and v.name = %s"
-            params.append(venue)
-
-        if home_team:
-            query += " and ht.name = %s"
-            params.append(home_team)
-
-        if away_team:
-            query += " and at.name = %s"
-            params.append(away_team)
-
-        if date:
-            query += " and date(m.start_time) = %s"
-            params.append(date)
-
-        if ticket_type:
-            query += " and tt.ticket_type = %s"
-            params.append(ticket_type)
-
-        if min_price is not None:
-            query += " and t.price >= %s"
-            params.append(min_price)
-
-        if max_price is not None:
-            query += " and t.price <= %s"
-            params.append(max_price)
-
-        query += """
-            order by
-                m.start_time asc,
-                t.price asc
-        """
-
-        cursor.execute(query, params)
-
-        tickets = cursor.fetchall()
+        for hit in response["hits"]["hits"]:
+            tickets.append(hit["_source"])
 
 
 
@@ -141,11 +131,7 @@ def search_ticket(
         return tickets
 
     finally:
-        if cursor is not None:
-            cursor.close()
-
-        if 'data_connection' in locals() and data_connection is not None:
-            data_connection.close()
+        pass
 
 
 def get_ticket_details(ticket_id: int):
@@ -228,3 +214,15 @@ def get_ticket_details(ticket_id: int):
     finally:
         cursor.close()
         connection.close()
+
+
+def get_match_tickets(match_id: int):
+    
+    tickets = get_tickets_by_match(match_id)
+
+
+    return {
+        "success": True,
+        "tickets": tickets
+    }
+

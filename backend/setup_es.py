@@ -1,8 +1,10 @@
 from elasticsearch import Elasticsearch
 
 # 1. Connect to the local Elasticsearch server
-es = Elasticsearch("http://localhost:9200")
-
+es = Elasticsearch(
+    "http://localhost:9200",
+    request_timeout=30
+)
 def setup_elasticsearch_indexes():
     """
     Creates the necessary Elasticsearch indexes with defined mappings

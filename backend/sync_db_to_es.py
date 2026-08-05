@@ -2,8 +2,10 @@ from elasticsearch import Elasticsearch, helpers
 import mysql.connector
 from db.database import get_connection 
 
-es = Elasticsearch("http://localhost:9200")
-
+es = Elasticsearch(
+    "http://localhost:9200",
+    request_timeout=120
+)
 def sync_tickets_to_elasticsearch():
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
@@ -64,7 +66,8 @@ def sync_tickets_to_elasticsearch():
 
         # send the bulk request to Elasticsearch
         print(" Syncing to Elasticsearch...")
-        helpers.bulk(es, actions)
+        print(es.ping())
+        helpers.bulk(es,actions,request_timeout=120)
         
         print(f" Successfully synced {len(actions)} tickets to Elasticsearch!")
 
