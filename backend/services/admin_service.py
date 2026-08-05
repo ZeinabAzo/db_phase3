@@ -134,3 +134,22 @@ def get_reserve_by_id_service(
         "success": True,
         "reserve": reserve
     }
+
+from repositories.admin_repository import (
+    get_dashboard_stats_repository
+)
+
+def get_dashboard_stats_service():
+
+    stats = get_dashboard_stats_repository()
+
+    return {
+
+        "success": True,
+
+        "data": stats
+
+    }
+
+
+
