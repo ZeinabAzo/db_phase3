@@ -458,12 +458,13 @@ def cancel_ticket_and_refund(reserve_id: int, user_id: int):
     payment = get_payment_by_reserve_id(
             reserve_id
     )
+    if payment:
 
-    create_refund(
-            payment_id=payment["payment_id"],
-            amount=refund_amount,
-            reason="canceled by user"
-    )
+        create_refund(
+                payment_id=payment["payment_id"],
+                amount=refund_amount,
+                reason="canceled by user"
+        )
 
     return {
         "success": True,
