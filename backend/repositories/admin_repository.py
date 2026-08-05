@@ -379,3 +379,63 @@ def expire_old_reserves():
 
         cursor.close()
         connection.close()
+
+def get_dashboard_stats_repository():
+
+    connection = get_connection()
+
+    cursor = connection.cursor(
+        dictionary=True
+    )
+
+    cursor.execute(
+        "SELECT COUNT(*) AS total_users FROM users"
+    )
+
+    total_users = cursor.fetchone()
+
+    cursor.execute(
+        "SELECT COUNT(*) AS total_matches FROM `match`"
+    )
+
+    total_matches = cursor.fetchone()
+
+    cursor.execute(
+        "SELECT COUNT(*) AS total_reservations FROM reserve"
+    )
+
+    total_reservations = cursor.fetchone()
+
+    cursor.execute(
+        """
+        SELECT
+            COALESCE(
+                SUM(amount),
+                0
+            ) AS total_revenue
+        FROM payment
+        WHERE payment_status='completed'
+        """
+    )
+
+    total_revenue = cursor.fetchone()
+
+    cursor.close()
+
+    connection.close()
+
+    return {
+
+        "total_users":
+            total_users["total_users"],
+
+        "total_matches":
+            total_matches["total_matches"],
+
+        "total_reservations":
+            total_reservations["total_reservations"],
+
+        "total_revenue":
+            total_revenue["total_revenue"]
+
+    }
