@@ -1,5 +1,6 @@
 from db.database import get_connection
 from datetime import datetime
+from repositories.ticket_repository import sync_single_ticket_to_es 
 
 def get_cancelled_reserves():
 
@@ -258,6 +259,7 @@ def make_ticket_available(
         SET status = 'available'
         WHERE ticket_id = %s
     """
+    sync_single_ticket_to_es(ticket_id)
 
     cursor.execute(query, (ticket_id,))
     connection.commit()
@@ -351,9 +353,7 @@ def expire_old_reserves():
 
         if ticket_ids:
 
-            placeholders = ",".join(
-                ["%s"] * len(ticket_ids)
-            )
+            placeholders = ",".join(["%s"] * len(ticket_ids))
 
             update_ticket_query = f"""
                 UPDATE ticket
@@ -368,15 +368,17 @@ def expire_old_reserves():
 
         connection.commit()
 
+        # Sync Elasticsearch after successful commit
+        for ticket_id in ticket_ids:
+            sync_single_ticket_to_es(ticket_id)
+
         return len(ticket_ids)
 
     except Exception:
-
         connection.rollback()
         raise
 
     finally:
-
         cursor.close()
         connection.close()
 
