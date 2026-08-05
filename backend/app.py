@@ -7,8 +7,7 @@ from routes.user_router import router as user_router
 from routes.report_router import router as report_router
 from routes.admin_router import router as admin_router
 from routes.payment_router import router as payment_router
-#این ثایل وجود نداره
-#from routes.matches_router import router as matches_router
+from routes.matches_router import router as matches_router
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils.reservation_expiry import expire_old_reservations
@@ -41,7 +40,7 @@ app.include_router(report_router)
 
 app.include_router(admin_router)
 app.include_router(payment_router)
-#app.include_router(matches_router)
+app.include_router(matches_router)
 
 # first test
 @app.get("/")

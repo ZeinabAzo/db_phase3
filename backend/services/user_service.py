@@ -56,15 +56,21 @@ def update_user_profile(
     profile_image: str | None = None,
     city: str | None = None
 ):
-    
-    city_id = get_city_id_by_name(city)
-    if city_id is None:
-        return {
-            "success": False,
-            "message": "City not found."
-        }
 
-    # Update user information in MySQL
+    city_id = None
+
+    if city and city.strip():
+
+        city_id = get_city_id_by_name(
+            city.strip()
+        )
+
+        if city_id is None:
+            return {
+                "success": False,
+                "message": "City not found."
+            }
+
     updated = update_user(
         user_id=user_id,
         first_name=first_name,
@@ -72,21 +78,20 @@ def update_user_profile(
         email=email,
         phone=phone,
         profile_image=profile_image,
-        city_id=city_id,
+        city_id=city_id
     )
 
-
     if not updated:
+
         return {
             "success": False,
             "message": "User not found or no information was provided for update."
         }
 
-    # Get Redis connection
     redis_db = get_redis()
 
-    # Remove old cached user profile
     cache_key = f"user_profile:{user_id}"
+
     redis_db.delete(cache_key)
 
     return {

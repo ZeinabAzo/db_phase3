@@ -1,5 +1,6 @@
 from db.database import get_connection
 from datetime import datetime
+from repositories.ticket_repository import sync_single_ticket_to_es 
 
 
 def expire_old_reservations():
@@ -19,16 +20,16 @@ def expire_old_reservations():
             (datetime.now(),)
         )
 
-
         expired_reserves = cursor.fetchall()
 
+        ticket_ids = []
 
         for reserve in expired_reserves:
-
 
             reserve_id = reserve[0]
             ticket_id = reserve[1]
 
+            ticket_ids.append(ticket_id)
 
             cursor.execute(
                 """
@@ -39,7 +40,6 @@ def expire_old_reservations():
                 (reserve_id,)
             )
 
-
             cursor.execute(
                 """
                 UPDATE ticket
@@ -49,9 +49,14 @@ def expire_old_reservations():
                 (ticket_id,)
             )
 
-
         connection.commit()
 
+        # Sync tickets with Elasticsearch
+        for ticket_id in ticket_ids:
+            try:
+                sync_single_ticket_to_es(ticket_id)
+            except Exception as e:
+                print(f"Failed to sync ticket {ticket_id}: {e}")
 
     except Exception as e:
 
@@ -61,7 +66,6 @@ def expire_old_reservations():
             "Expire reservation error:",
             e
         )
-
 
     finally:
 
