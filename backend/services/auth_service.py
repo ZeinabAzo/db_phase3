@@ -14,7 +14,10 @@ from utils.security import (
     hash_password,
     create_access_token
 )
-def generate_and_save_otp(identifier: str):
+from utils.email_sender import send_otp_email
+from fastapi import BackgroundTasks
+
+def generate_and_save_otp(identifier: str, bg_tasks: BackgroundTasks):
     # generating a random 6-digit OTP code
     otp_code = str(random.randint(100000, 999999))
     
@@ -23,6 +26,10 @@ def generate_and_save_otp(identifier: str):
     
     #  3 minutes expiration time for the OTP code
     redis_db.set(name=f"otp:{identifier}", value=otp_code, ex=180) # key value output: otp:<phone or email> -> <otp_code>
+
+    #if there is @ in it then it is an email 
+    if "@" in identifier:
+        bg_tasks.add_task(send_otp_email, identifier, otp_code)
     
     # printing the OTP code to the console for testing purposes
     print(f"\n=====================================")
@@ -210,7 +217,8 @@ def signup_user(
     last_name: str,
     password: str,
     city: str,
-    role: str
+    role: str,
+    bg_tasks: BackgroundTasks
 ):
     
     #Check if user already exists
@@ -255,7 +263,7 @@ def signup_user(
         ex=300
     )
 
-    generate_and_save_otp(identifier)
+    generate_and_save_otp(identifier, bg_tasks)
 
     return {
     "success": True,
@@ -354,7 +362,8 @@ def verify_signup(
 
 def send_signin_otp(
     identifier: str,
-    identifier_type: str
+    identifier_type: str,
+    bg_tasks: BackgroundTasks
 ):
     user = get_user_by_identifier(
         identifier=identifier,
@@ -367,7 +376,7 @@ def send_signin_otp(
             "message": "User not found."
         }
 
-    generate_and_save_otp(identifier)
+    generate_and_save_otp(identifier, bg_tasks)
 
     return {
         "success": True,
