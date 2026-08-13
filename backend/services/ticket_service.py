@@ -4,7 +4,6 @@ from cache.redis_client import get_redis
 #from db.database import get_connection
 from repositories.ticket_repository import get_tickets_by_match
 from utils.es_client import get_es_client
-
 def search_ticket(
     city=None,
     sport_type=None,
@@ -18,83 +17,107 @@ def search_ticket(
     query=None,
 ):
 
-    #cursor = None
-
     try:
-        #data_connection = get_connection()
         redis = get_redis()
         es = get_es_client()
         must_queries = []
 
+        # City
         if city:
-            must_queries.append({"term":{"city_name": city}})
-
-
-        if sport_type:
             must_queries.append({
-                "term": {
-                    "sport_name" : sport_type
+                "match": {
+                    "city_name": city
                 }
             })
 
+        # Sport type
+        if sport_type:
+            must_queries.append({
+                "term": {
+                    "sport_name": sport_type
+                }
+            })
+
+        # Venue / Stadium
         if venue:
             must_queries.append({
-                "match":{
+                "match": {
                     "venue_name": venue
                 }
             })
 
+        # Home team
         if home_team:
             must_queries.append({
-                "match" : {
-                    "home_team_name" : home_team
+                "match": {
+                    "home_team_name": home_team
                 }
             })
 
+        # Away team
         if away_team:
             must_queries.append({
-                "match" : {
-                    "away_team_name" : away_team
+                "match_phrase": {
+                    "away_team_name": away_team
                 }
             })
 
+        # Ticket type
         if ticket_type:
             must_queries.append({
-                "term" : {
-                    "ticket_type" : ticket_type
+                "match": {
+                    "ticket_type": ticket_type
                 }
             })
 
+        # Minimum price
         if min_price is not None:
             must_queries.append({
-                "range":{"price" :{"gte" : min_price}}
-            })
-
-        if max_price is not None:
-            must_queries.append({
-                "range" : {
-                    "price" : {"lte" : max_price}
+                "range": {
+                    "price": {
+                        "gte": min_price
+                    }
                 }
             })
 
+        # Maximum price
+        if max_price is not None:
+            must_queries.append({
+                "range": {
+                    "price": {
+                        "lte": max_price
+                    }
+                }
+            })
+
+        # General search
         if query:
             must_queries.append({
                 "multi_match": {
                     "query": query,
                     "fields": [
-                        "home_team_name","away_team_name","venue_name","stadium_name"],"fuzziness": "AUTO"
-                        }})
+                        "home_team_name",
+                        "away_team_name",
+                        "venue_name",
+                        "stadium_name"
+                    ],
+                    "fuzziness": "AUTO"
+                }
+            })
 
+        # Date
         if date:
             must_queries.append({
-            "term": {"start_time": date}
-        })
+                "term": {
+                    "start_time": date
+                }
+            })
 
-
-
+        # Cache key
         cache_key = (
             f"search_ticket:"
-            f"{city}:{sport_type}:{venue}:{home_team}:{away_team}:{date}:{ticket_type}:{min_price}:{max_price}"
+            f"{city}:{sport_type}:{venue}:{home_team}:{away_team}:"
+            f"{date}:{ticket_type}:{min_price}:{max_price}:{query}"
         )
 
         cached_data = redis.get(cache_key)
@@ -103,17 +126,24 @@ def search_ticket(
             return json.loads(cached_data)
 
         search_query = {
-            "bool":{
-                "must" : must_queries, "filter" : [
+            "bool": {
+                "must": must_queries,
+                "filter": [
                     {
-                        "term" :{"status": "available"}
+                        "term": {
+                            "status": "available"
+                        }
                     }
                 ]
             }
         }
+
         response = es.search(
-            index = "tickets", query = search_query, sort = [
-                {"start_time" : "asc"}, {"price": "asc"}
+            index="tickets",
+            query=search_query,
+            sort=[
+                {"start_time": "asc"},
+                {"price": "asc"}
             ]
         )
 
@@ -122,17 +152,16 @@ def search_ticket(
         for hit in response["hits"]["hits"]:
             tickets.append(hit["_source"])
 
-
-
         redis.setex(
-            cache_key,300,json.dumps(tickets, default=str)
+            cache_key,
+            300,
+            json.dumps(tickets, default=str)
         )
 
         return tickets
 
     finally:
         pass
-
 
 def get_ticket_details(ticket_id: int):
     connection = get_connection()
