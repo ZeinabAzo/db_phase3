@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from services.auth_service import (
@@ -23,11 +23,12 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 #---------------------------------------------------------------------------------------------------------------
 @router.post("/signin/send-otp")
-def send_login_otp(request: OTPRequest):
+def send_login_otp(request: OTPRequest, background_tasks: BackgroundTasks):
 
     result = send_signin_otp(
         identifier=request.identifier,
-        identifier_type=request.identifier_type
+        identifier_type=request.identifier_type,
+        bg_tasks=background_tasks
     )
 
     if not result["success"]:
@@ -109,7 +110,7 @@ def login(request: LoginRequest):
 
 
 @router.post("/signup")
-def signup(request: SignUpRequest):
+def signup(request: SignUpRequest, background_tasks: BackgroundTasks):
 
     result = signup_user(
         identifier=request.identifier,
@@ -118,7 +119,8 @@ def signup(request: SignUpRequest):
         last_name=request.last_name,
         password=request.password,
         city=request.city,
-        role=request.role
+        role=request.role,
+        bg_tasks=background_tasks
     )
 
     if not result["success"]:
@@ -140,6 +142,7 @@ def signup_verify(request: VerifySignUpRequest):
 
     if not result["success"]:
         raise HTTPException(
+
             status_code=400,
             detail=result["message"]
         )
