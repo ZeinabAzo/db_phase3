@@ -9,57 +9,45 @@ import {
     paymentCallback
 } from "../services/paymentApi";
 
-function ActiveReservations() {
+function ActiveReservations(){
 
-    const [reservations, setReservations] = useState([]);
+    const [reservations,setReservations]=useState([]);
 
-    const [loading, setLoading] = useState(true);
-    const [currentTime, setCurrentTime] = useState(Date.now());
+    const [loading,setLoading] =useState(true);
+    const [currentTime,setCurrentTime] =useState(Date.now());
 
-    useEffect(() => {
+    useEffect(()=>{
 
         getActiveReservations()
 
-            .then((response) => {
+            .then((response)=>{
 
                 console.log(
-                    "RESERVATIONS:",
-                    response.data
+                    "RESERVATIONS:",response.data
                 );
 
-                setReservations(
-                    response.data.data || []
-                );
+                setReservations(response.data.data || []);
 
             })
 
-            .catch((error) => {
+            .catch((error)=>{
 
-                console.log(
-                    "RESERVATIONS ERROR:",
-                    error.response?.data
-                );
+                console.log("RESERVATIONS ERROR:",error.response?.data);})
 
-            })
-
-            .finally(() => {
-
-                setLoading(false);
-
-            });
+            .finally(()=>{setLoading(false);});
 
     }, []);
 
 
-    useEffect(() => {
+    useEffect(()=>{
 
-        const interval = setInterval(() => {
+        const interval=setInterval(()=>{
 
             setCurrentTime(Date.now());
 
         }, 1000);
 
-        return () => clearInterval(interval);
+        return ()=>clearInterval(interval);
 
     }, []);
 
@@ -67,53 +55,37 @@ function ActiveReservations() {
 
         requestPayment(reserve_id)
 
-            .then((response) => {
+            .then((response)=>{
 
-                console.log(
-                    "PAYMENT:",
-                    response.data
-                );
+                console.log("PAYMENT:",response.data);
 
-                return paymentCallback(
-                    response.data.transaction_id
-                );
+                return paymentCallback(response.data.transaction_id);
 
             })
 
-            .then((response) => {
+            .then((response)=>{
 
-                console.log(
-                    "CALLBACK:",
-                    response.data
-                );
+                console.log("CALLBACK:",response.data);
 
-                alert(
-                    "Payment completed successfully"
-                );
+                alert("Payment completed successfully");
 
                 getActiveReservations()
 
-                    .then((response) => {
+                    .then((response)=>{
 
-                        setReservations(
-                            response.data.data
-                        );
+                        setReservations(response.data.data);
 
                     });
 
             })
 
-            .catch((error) => {
+            .catch((error)=>{
 
                 console.log(
-                    "PAYMENT ERROR:",
-                    error.response?.data
-                );
+                    "PAYMENT ERROR:",error.response?.data);
 
                 alert(
-                    error.response?.data?.detail ||
-                    "Payment failed"
-                );
+                    error.response?.data?.detail ||"Payment failed");
 
             });
 
@@ -123,15 +95,13 @@ function ActiveReservations() {
 
         const diff = new Date(expireAt) - currentTime;
 
-        if (diff <= 0) {
+        if (diff<=0) {
             return "Expired";
         }
 
-        const minutes = Math.floor(diff / 60000);
+        const minutes=Math.floor(diff / 60000);
 
-        const seconds = Math.floor(
-            (diff % 60000) / 1000
-        );
+        const seconds=Math.floor((diff % 60000) / 1000);
 
         return `${minutes}:${seconds
             .toString()
@@ -140,9 +110,9 @@ function ActiveReservations() {
     }
 
 
-    if (loading) {
+    if(loading){
 
-        return (
+        return(
 
             <div className="
                 min-h-screen
@@ -195,7 +165,6 @@ function ActiveReservations() {
             overflow-hidden
         ">
 
-            {/* Background glow */}
 
             <div className="
                 absolute
@@ -229,7 +198,6 @@ function ActiveReservations() {
             ">
 
 
-                {/* Header */}
 
                 <div className="
                     mb-10
@@ -293,10 +261,9 @@ function ActiveReservations() {
                 </div>
 
 
-                {/* Reservations */}
 
                 {
-                    reservations.length > 0 ? (
+                    reservations.length>0? (
 
                         <div className="
                             grid
@@ -305,7 +272,7 @@ function ActiveReservations() {
                         ">
 
                             {
-                                reservations.map((reserve) => (
+                                reservations.map((reserve)=>(
 
                                     <div
                                         key={reserve.reserve_id}
@@ -325,7 +292,6 @@ function ActiveReservations() {
                                     >
 
 
-                                        {/* Header */}
 
                                         <div className="
                                             bg-gradient-to-r
@@ -383,12 +349,10 @@ function ActiveReservations() {
                                         </div>
 
 
-                                        {/* Details */}
 
                                         <div className="p-6">
 
 
-                                            {/* Match */}
 
                                             <div className="
                                                 mb-6
@@ -426,8 +390,6 @@ function ActiveReservations() {
 
                                             </div>
 
-
-                                            {/* Information */}
 
                                             <div className="
                                                 grid
@@ -491,7 +453,6 @@ function ActiveReservations() {
                                             </div>
 
 
-                                            {/* Dates */}
 
                                             <div className="
                                                 mt-5
