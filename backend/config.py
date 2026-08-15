@@ -13,3 +13,8 @@ REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+# Email Config (OTP)
+MAIL_USERNAME="Tickethub939@gmail.com"
+MAIL_PASSWORD="narjggczpmcznnqz"
+MAIL_FROM="Tickethub939@gmail.com"
